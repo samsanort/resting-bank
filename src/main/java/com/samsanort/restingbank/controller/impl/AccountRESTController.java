@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 
 import javax.servlet.http.HttpServletRequest;
 import java.math.BigDecimal;
@@ -27,10 +28,10 @@ public class AccountRESTController implements AccountController {
     @Autowired
     AccountDataService accountDataService;
 
-    @RequestMapping(value = "/{accountId}/withdraws", method = RequestMethod.POST)
+    @RequestMapping(value = "/{accountId}/withdrawals", method = RequestMethod.POST)
     @ResponseStatus(HttpStatus.CREATED)
     public void withdraw(
-            @PathVariable String accountId,
+            @PathVariable Long accountId,
             @RequestBody BigDecimal amount) {
 
         accountDataService.withdraw(accountId, amount);
@@ -39,7 +40,7 @@ public class AccountRESTController implements AccountController {
     @RequestMapping(value = "/{accountId}/deposits", method = RequestMethod.POST)
     @ResponseStatus(HttpStatus.CREATED)
     public void deposit(
-            @PathVariable String accountId,
+            @PathVariable Long accountId,
             @RequestBody BigDecimal amount) {
 
         accountDataService.deposit(accountId, amount);
@@ -48,12 +49,12 @@ public class AccountRESTController implements AccountController {
     @RequestMapping(value = "/{accountId}", method = RequestMethod.GET)
     @ResponseStatus(HttpStatus.OK)
     public StatementDto statement(
-            @PathVariable String accountId) {
+            @PathVariable Long accountId) {
 
         return accountDataService.statement(accountId);
     }
 
-    @ExceptionHandler(AccountNotFoundException.class)
+    @ExceptionHandler({AccountNotFoundException.class, MethodArgumentTypeMismatchException.class})
     @ResponseStatus(value = HttpStatus.NOT_FOUND, reason = "Account not found")
     public void accountNotFound() {}
 

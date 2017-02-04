@@ -17,7 +17,7 @@ public interface AccountDataService {
      * @throws IllegalArgumentException
      * @throws InsufficientFundsException
      */
-    void withdraw(String accountId, BigDecimal amount);
+    void withdraw(Long accountId, BigDecimal amount);
 
     /**
      *
@@ -26,7 +26,7 @@ public interface AccountDataService {
      * @throws AccountNotFoundException
      * @throws IllegalArgumentException
      */
-    void deposit(String accountId, BigDecimal amount);
+    void deposit(Long accountId, BigDecimal amount);
 
     /**
      *
@@ -34,13 +34,5 @@ public interface AccountDataService {
      * @return
      * @throws AccountNotFoundException
      */
-    StatementDto statement(String accountId);
-
-    /**
-     *
-     * @param accountId
-     * @return
-     * @throws AccountNotFoundException
-     */
-    BigDecimal balance(String accountId);
+    StatementDto statement(Long accountId);
 }

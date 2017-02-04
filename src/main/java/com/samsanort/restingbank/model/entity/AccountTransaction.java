@@ -1,29 +1,31 @@
-package com.samsanort.restingbank.model.dto;
+package com.samsanort.restingbank.model.entity;
 
+import javax.persistence.*;
 import java.math.BigDecimal;
 import java.util.Date;
 
 /**
  * TODO add description
  */
-public class TransactionDto {
+@Entity
+public class AccountTransaction {
+
+    @Id
+    @GeneratedValue(strategy= GenerationType.AUTO)
+    private Long id;
 
     private Date date;
     private BigDecimal amount;
     private String description;
 
-    public TransactionDto(Date date, BigDecimal amount, String description) {
+    public AccountTransaction(Date date, BigDecimal amount, String description) {
         this.date = date;
         this.amount = amount;
         this.description = description;
     }
 
-    public BigDecimal getAmount() {
-        return amount;
-    }
-
-    public void setAmount(BigDecimal amount) {
-        this.amount = amount;
+    public Long getId() {
+        return id;
     }
 
     public Date getDate() {
@@ -32,6 +34,14 @@ public class TransactionDto {
 
     public void setDate(Date date) {
         this.date = date;
+    }
+
+    public BigDecimal getAmount() {
+        return amount;
+    }
+
+    public void setAmount(BigDecimal amount) {
+        this.amount = amount;
     }
 
     public String getDescription() {

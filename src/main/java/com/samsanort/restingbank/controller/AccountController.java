@@ -14,19 +14,19 @@ public interface AccountController {
      * @param accountId
      * @param amount
      */
-    void withdraw(String accountId, BigDecimal amount);
+    void withdraw(Long accountId, BigDecimal amount);
 
     /**
      *
      * @param accountId
      * @param amount
      */
-    void deposit(String accountId, BigDecimal amount);
+    void deposit(Long accountId, BigDecimal amount);
 
     /**
      *
      * @param accountId
      * @return
      */
-    StatementDto statement(String accountId);
+    StatementDto statement(Long accountId);
 }

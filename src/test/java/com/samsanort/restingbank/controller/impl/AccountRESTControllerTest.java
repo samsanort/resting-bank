@@ -40,11 +40,16 @@ public class AccountRESTControllerTest {
     @MockBean
     private AccountDataService accountDataService;
 
-    private final static String ACCOUNT_ID = "account-id";
-    private static final String URL_ACCOUNT_CONTROLLER = "/accounts";
-    private static final String URL_ACCOUNT = URL_ACCOUNT_CONTROLLER + "/" + ACCOUNT_ID;
-    private static final String URL_ACCOUNT_DEPOSITS = URL_ACCOUNT + "/deposits";
-    private static final String URL_ACCOUNT_WITHDRAWS = URL_ACCOUNT + "/withdraws";
+    private final static Long ACCOUNT_ID = 1000L;
+    private static final String URLPART_ACCOUNTS = "/accounts";
+    private static final String URLPART_WITHDRAWALS = "/withdrawals";
+    private static final String URLPART_DEPOSITS = "/deposits";
+
+
+    private static final String URL_CONTROLLER = URLPART_ACCOUNTS;
+    private static final String URL_ACCOUNT = URL_CONTROLLER + "/" + ACCOUNT_ID;
+    private static final String URL_ACCOUNT_DEPOSITS = URL_ACCOUNT + URLPART_DEPOSITS;
+    private static final String URL_ACCOUNT_WITHDRAWS = URL_ACCOUNT + URLPART_WITHDRAWALS;
 
     // --- deposit ------------------------------------------------------------
 
@@ -75,6 +80,19 @@ public class AccountRESTControllerTest {
         // When
         ResultActions result = mvc.perform(
                 post(URL_ACCOUNT_DEPOSITS)
+                        .content("100")
+                        .contentType(MediaType.APPLICATION_JSON) );
+
+        // Then
+        result.andExpect(status().isNotFound());
+    }
+
+    @Test
+    public void deposit_accountIdIsNotNumber_responds404() throws Exception {
+
+        // When
+        ResultActions result = mvc.perform(
+                post(URL_CONTROLLER + "/not-a-number" + URLPART_DEPOSITS)
                         .content("100")
                         .contentType(MediaType.APPLICATION_JSON) );
 
@@ -183,6 +201,19 @@ public class AccountRESTControllerTest {
     }
 
     @Test
+    public void withdraw_accountIdIsNotNumber_responds404() throws Exception {
+
+        // When
+        ResultActions result = mvc.perform(
+                post(URL_CONTROLLER + "/not-a-number" + URLPART_WITHDRAWALS)
+                        .content("100")
+                        .contentType(MediaType.APPLICATION_JSON) );
+
+        // Then
+        result.andExpect(status().isNotFound());
+    }
+
+    @Test
     public void withdraw_dataServiceThrowsIllegalArgumentException_responds400() throws Exception {
 
         // Given
@@ -255,6 +286,16 @@ public class AccountRESTControllerTest {
 
         // When
         ResultActions result = mvc.perform(get(URL_ACCOUNT));
+
+        // Then
+        result.andExpect(status().isNotFound());
+    }
+
+    @Test
+    public void statement_accountIdIsNotNumber_responds404() throws Exception {
+
+        // When
+        ResultActions result = mvc.perform(get(URL_CONTROLLER + "/not-a-number"));
 
         // Then
         result.andExpect(status().isNotFound());

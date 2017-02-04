@@ -14,17 +14,10 @@ public class StatementDto {
     private BigDecimal balance;
     private List<TransactionDto> transactions = new ArrayList<>();
 
-    /**
-     * C'tor.
-     * @param date
-     * @param balance
-     */
     public StatementDto(Date date, BigDecimal balance) {
         this.date = date;
         this.balance = balance;
     }
-
-    public StatementDto(){}
 
     public BigDecimal getBalance() {
         return balance;
