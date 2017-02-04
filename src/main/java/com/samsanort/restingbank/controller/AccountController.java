@@ -1,6 +1,6 @@
 package com.samsanort.restingbank.controller;
 
-import com.samsanort.restingbank.model.dto.StatementDTO;
+import com.samsanort.restingbank.model.dto.StatementDto;
 
 import java.math.BigDecimal;
 
@@ -28,12 +28,5 @@ public interface AccountController {
      * @param accountId
      * @return
      */
-    StatementDTO statement(String accountId);
-
-    /**
-     *
-     * @param accountId
-     * @return
-     */
-    BigDecimal balance(String accountId);
+    StatementDto statement(String accountId);
 }

@@ -1,6 +1,6 @@
 package com.samsanort.restingbank.dataservice;
 
-import com.samsanort.restingbank.model.dto.StatementDTO;
+import com.samsanort.restingbank.model.dto.StatementDto;
 
 import java.math.BigDecimal;
 
@@ -13,6 +13,9 @@ public interface AccountDataService {
      *
      * @param accountId
      * @param amount
+     * @throws AccountNotFoundException
+     * @throws IllegalArgumentException
+     * @throws InsufficientFundsException
      */
     void withdraw(String accountId, BigDecimal amount);
 
@@ -20,6 +23,8 @@ public interface AccountDataService {
      *
      * @param accountId
      * @param amount
+     * @throws AccountNotFoundException
+     * @throws IllegalArgumentException
      */
     void deposit(String accountId, BigDecimal amount);
 
@@ -27,13 +32,15 @@ public interface AccountDataService {
      *
      * @param accountId
      * @return
+     * @throws AccountNotFoundException
      */
-    StatementDTO statement(String accountId);
+    StatementDto statement(String accountId);
 
     /**
      *
      * @param accountId
      * @return
+     * @throws AccountNotFoundException
      */
     BigDecimal balance(String accountId);
 }
