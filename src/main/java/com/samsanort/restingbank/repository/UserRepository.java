@@ -7,4 +7,11 @@ import org.springframework.data.repository.CrudRepository;
  * TODO add description
  */
 public interface UserRepository extends CrudRepository<User, Long>{
+
+    /**
+     *
+     * @param email
+     * @return
+     */
+    User findByEmail(String email);
 }

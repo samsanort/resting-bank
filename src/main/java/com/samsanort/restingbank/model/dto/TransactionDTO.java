@@ -12,6 +12,8 @@ public class TransactionDto {
     private BigDecimal amount;
     private String description;
 
+    public TransactionDto(){}
+
     public TransactionDto(Date date, BigDecimal amount, String description) {
         this.date = date;
         this.amount = amount;

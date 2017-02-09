@@ -18,6 +18,8 @@ public class AccountTransaction {
     private BigDecimal amount;
     private String description;
 
+    public AccountTransaction(){}
+
     public AccountTransaction(Date date, BigDecimal amount, String description) {
         this.date = date;
         this.amount = amount;

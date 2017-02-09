@@ -9,6 +9,7 @@ import com.samsanort.restingbank.model.entity.AccountTransaction;
 import com.samsanort.restingbank.model.entity.BankAccount;
 import com.samsanort.restingbank.repository.BankAccountRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
 import java.util.Date;
@@ -16,6 +17,8 @@ import java.util.Date;
 /**
  * TODO add description
  */
+
+@Component("accountDataService")
 public class AccountDataServiceImpl implements AccountDataService {
 
     @Autowired
@@ -39,6 +42,14 @@ public class AccountDataServiceImpl implements AccountDataService {
         BankAccount account = retrieveBankAccountOrFail( accountId );
 
         return new Statement(account.getBalance(), account.getTransactions()).toDto();
+    }
+
+    @Override
+    public Long getOwnerId(Long accountId) {
+
+        BankAccount bankAccount = retrieveBankAccountOrFail(accountId);
+
+        return bankAccount.getOwner().getId();
     }
 
     private void processTransaction(Long accountId, BigDecimal amount, TransactionType transactionType) {

@@ -35,4 +35,11 @@ public interface AccountDataService {
      * @throws AccountNotFoundException
      */
     StatementDto statement(Long accountId);
+
+    /**
+     *
+     * @param accountId
+     * @return
+     */
+    Long getOwnerId(Long accountId);
 }

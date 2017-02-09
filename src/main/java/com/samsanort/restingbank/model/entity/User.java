@@ -18,9 +18,34 @@ public class User {
     @OneToOne
     private BankAccount account;
 
+    public User(){}
+
+    /**
+     *
+     * @param email
+     * @param password
+     */
+    public User(String email, String password) {
+        this.email = email;
+        this.password = password;
+    }
+
+    /**
+     *
+     * @param id
+     * @param email
+     * @param password
+     */
+    public User(Long id, String email, String password) {
+        this(email, password);
+        this.id = id;
+    }
+
     public Long getId() {
         return id;
     }
+
+    public void setId(Long id) { this.id = id; }
 
     public String getEmail() {
         return email;

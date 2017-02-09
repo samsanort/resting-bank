@@ -17,8 +17,13 @@ public class BankAccount {
 
     private BigDecimal balance = new BigDecimal(0);
 
+    @OneToOne
+    private User owner;
+
     @OneToMany
     private List<AccountTransaction> transactions = new ArrayList<>();
+
+    public BankAccount() {}
 
     public BankAccount(Long id, BigDecimal balance) {
         this.id = id;
@@ -27,6 +32,10 @@ public class BankAccount {
 
     public Long getId() {
         return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
     }
 
     public BigDecimal getBalance() {
@@ -44,4 +53,8 @@ public class BankAccount {
     public void setTransactions(List<AccountTransaction> transactions) {
         this.transactions = transactions;
     }
+
+    public void setOwner(User user) { this.owner = user; }
+
+    public User getOwner() { return this.owner; }
 }

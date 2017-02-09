@@ -1,6 +1,5 @@
 package com.samsanort.restingbank.controller.impl;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.samsanort.restingbank.dataservice.AccountDataService;
 import com.samsanort.restingbank.dataservice.AccountNotFoundException;
 import com.samsanort.restingbank.dataservice.InsufficientFundsException;
@@ -8,310 +7,168 @@ import com.samsanort.restingbank.model.dto.StatementDto;
 import com.samsanort.restingbank.model.dto.TransactionDto;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.http.MediaType;
-import org.springframework.test.context.junit4.SpringRunner;
-import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.ResultActions;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.runners.MockitoJUnitRunner;
 
 import java.math.BigDecimal;
 import java.util.Date;
 
+import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.core.IsEqual.equalTo;
 import static org.mockito.BDDMockito.*;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.eq;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 /**
  * TODO Add description
  */
-@RunWith(SpringRunner.class)
-@WebMvcTest(AccountRESTController.class)
+@RunWith(MockitoJUnitRunner.class)
 public class AccountRESTControllerTest {
 
-    @Autowired
-    private MockMvc mvc;
+    @InjectMocks
+    private AccountRESTController testSubject;
 
-    @MockBean
+    @Mock
     private AccountDataService accountDataService;
 
-    private final static Long ACCOUNT_ID = 1000L;
-    private static final String URLPART_ACCOUNTS = "/accounts";
-    private static final String URLPART_WITHDRAWALS = "/withdrawals";
-    private static final String URLPART_DEPOSITS = "/deposits";
-
-
-    private static final String URL_CONTROLLER = URLPART_ACCOUNTS;
-    private static final String URL_ACCOUNT = URL_CONTROLLER + "/" + ACCOUNT_ID;
-    private static final String URL_ACCOUNT_DEPOSITS = URL_ACCOUNT + URLPART_DEPOSITS;
-    private static final String URL_ACCOUNT_WITHDRAWS = URL_ACCOUNT + URLPART_WITHDRAWALS;
+    private static final Long ACCOUNT_ID = 99L;
+    private static final BigDecimal HUNDRED_EUROS = new BigDecimal(100);
 
     // --- deposit ------------------------------------------------------------
 
     @Test
-    public void deposit_happyPath_responds201() throws Exception {
+    public void deposit_happyPath_depositIsDone() throws Exception {
+
+        // When
+        testSubject.deposit(ACCOUNT_ID, HUNDRED_EUROS);
+
+        // Then
+        verify(accountDataService).deposit(eq(ACCOUNT_ID), eq(HUNDRED_EUROS));
+    }
+
+    @Test(expected = AccountNotFoundException.class)
+    public void deposit_dataServiceThrowsAccountNotFoundException_exceptionIsPropagated() throws Exception {
 
         // Given
-        willDoNothing()
-                .given(accountDataService).deposit( eq(ACCOUNT_ID), any(BigDecimal.class));
+        doThrow(new AccountNotFoundException(ACCOUNT_ID)).when(accountDataService).deposit(eq(ACCOUNT_ID), any(BigDecimal.class));
 
         // When
-        ResultActions result = mvc.perform(
-                post(URL_ACCOUNT_DEPOSITS)
-                        .content("100")
-                        .contentType(MediaType.APPLICATION_JSON) );
-
-        // Then
-        result.andExpect(status().isCreated());
+        testSubject.deposit(ACCOUNT_ID, HUNDRED_EUROS);
     }
 
-    @Test
-    public void deposit_dataServiceThrowsAccountNotFoundException_responds404() throws Exception {
+    @Test(expected = IllegalArgumentException.class)
+    public void deposit_dataServiceThrowsIllegalArgumentException_exceptionIsPropagated() throws Exception {
 
         // Given
-        willThrow( AccountNotFoundException.class)
-                .given(accountDataService).deposit( eq(ACCOUNT_ID), any(BigDecimal.class));
+        doThrow(new IllegalArgumentException()).when(accountDataService).deposit(eq(ACCOUNT_ID), any(BigDecimal.class));
 
         // When
-        ResultActions result = mvc.perform(
-                post(URL_ACCOUNT_DEPOSITS)
-                        .content("100")
-                        .contentType(MediaType.APPLICATION_JSON) );
-
-        // Then
-        result.andExpect(status().isNotFound());
+        testSubject.deposit(ACCOUNT_ID, HUNDRED_EUROS);
     }
 
-    @Test
-    public void deposit_accountIdIsNotNumber_responds404() throws Exception {
-
-        // When
-        ResultActions result = mvc.perform(
-                post(URL_CONTROLLER + "/not-a-number" + URLPART_DEPOSITS)
-                        .content("100")
-                        .contentType(MediaType.APPLICATION_JSON) );
-
-        // Then
-        result.andExpect(status().isNotFound());
-    }
-
-    @Test
-    public void deposit_dataServiceThrowsIllegalArgumentException_responds400() throws Exception {
+    @Test(expected = Exception.class)
+    public void deposit_unexpectedException_exceptionIsPropagated() throws Exception {
 
         // Given
-        willThrow( IllegalArgumentException.class)
-                .given(accountDataService).deposit( eq(ACCOUNT_ID), any(BigDecimal.class));
+        doThrow(new Exception()).when(accountDataService).deposit(eq(ACCOUNT_ID), any(BigDecimal.class));
 
         // When
-        ResultActions result = mvc.perform(
-                post(URL_ACCOUNT_DEPOSITS)
-                        .content("-100")
-                        .contentType(MediaType.APPLICATION_JSON) );
-
-        // Then
-        result.andExpect(status().isBadRequest());
-    }
-
-    @Test
-    public void deposit_requestContentIsInvalid_responds400() throws Exception {
-
-        // When
-        ResultActions result = mvc.perform(
-                post(URL_ACCOUNT_DEPOSITS)
-                        .content("invalid content")
-                        .contentType(MediaType.APPLICATION_JSON) );
-
-        // Then
-        result.andExpect(status().isBadRequest());
-    }
-
-    @Test
-    public void deposit_unexpectedException_responds500() throws Exception {
-
-        // Given
-        willThrow( RuntimeException.class)
-                .given(accountDataService).deposit( eq(ACCOUNT_ID), any(BigDecimal.class));
-
-        // When
-        ResultActions result = mvc.perform(
-                post(URL_ACCOUNT_DEPOSITS)
-                        .content("100")
-                        .contentType(MediaType.APPLICATION_JSON) );
-
-        // Then
-        result.andExpect(status().isInternalServerError());
+        testSubject.deposit(ACCOUNT_ID, HUNDRED_EUROS);
     }
 
     // --- withdraw -----------------------------------------------------------
 
     @Test
-    public void withdraw_happyPath_responds201() throws Exception {
+    public void withdraw_happyPath_withdrawIsDone() throws Exception {
+
+        // When
+        testSubject.withdraw(ACCOUNT_ID, HUNDRED_EUROS);
+
+        // Then
+        verify(accountDataService).withdraw(eq(ACCOUNT_ID), eq(HUNDRED_EUROS));
+    }
+
+    @Test(expected = InsufficientFundsException.class)
+    public void withdraw_dataServiceThrowsInsufficientFundsException_exceptionIsPropagated() throws Exception {
 
         // Given
-        willDoNothing()
-                .given(accountDataService).withdraw( eq(ACCOUNT_ID), any(BigDecimal.class));
+        doThrow(new InsufficientFundsException(new BigDecimal(0), HUNDRED_EUROS)).when(accountDataService).withdraw(eq(ACCOUNT_ID), any(BigDecimal.class));
 
         // When
-        ResultActions result = mvc.perform(
-                post(URL_ACCOUNT_WITHDRAWS)
-                        .content("100")
-                        .contentType(MediaType.APPLICATION_JSON) );
-
-        // Then
-        result.andExpect(status().isCreated());
+        testSubject.withdraw(ACCOUNT_ID, HUNDRED_EUROS);
     }
 
-    @Test
-    public void withdraw_dataServiceThrowsInsufficientFundsException_responds409() throws Exception {
+    @Test(expected = AccountNotFoundException.class)
+    public void withdraw_dataServiceThrowsAccountNotFoundException_exceptionIsPropagated() throws Exception {
 
         // Given
-        willThrow( InsufficientFundsException.class)
-                .given(accountDataService).withdraw( eq(ACCOUNT_ID), any(BigDecimal.class));
+        doThrow(new AccountNotFoundException(ACCOUNT_ID)).when(accountDataService).withdraw(eq(ACCOUNT_ID), any(BigDecimal.class));
 
         // When
-        ResultActions result = mvc.perform(
-                post(URL_ACCOUNT_WITHDRAWS)
-                        .content("100")
-                        .contentType(MediaType.APPLICATION_JSON) );
-
-        // Then
-        result.andExpect(status().isConflict());
+        testSubject.withdraw(ACCOUNT_ID, HUNDRED_EUROS);
     }
 
-    @Test
-    public void withdraw_dataServiceThrowsAccountNotFoundException_responds404() throws Exception {
+    @Test(expected = IllegalArgumentException.class)
+    public void withdraw_dataServiceThrowsIllegalArgumentException_exceptionIsPropagated() throws Exception {
 
         // Given
-        willThrow( AccountNotFoundException.class)
-                .given(accountDataService).withdraw( eq(ACCOUNT_ID), any(BigDecimal.class));
+        doThrow(new IllegalArgumentException()).when(accountDataService).withdraw(eq(ACCOUNT_ID), any(BigDecimal.class));
 
         // When
-        ResultActions result = mvc.perform(
-                post(URL_ACCOUNT_WITHDRAWS)
-                        .content("100")
-                        .contentType(MediaType.APPLICATION_JSON) );
-
-        // Then
-        result.andExpect(status().isNotFound());
+        testSubject.withdraw(ACCOUNT_ID, HUNDRED_EUROS);
     }
 
-    @Test
-    public void withdraw_accountIdIsNotNumber_responds404() throws Exception {
-
-        // When
-        ResultActions result = mvc.perform(
-                post(URL_CONTROLLER + "/not-a-number" + URLPART_WITHDRAWALS)
-                        .content("100")
-                        .contentType(MediaType.APPLICATION_JSON) );
-
-        // Then
-        result.andExpect(status().isNotFound());
-    }
-
-    @Test
-    public void withdraw_dataServiceThrowsIllegalArgumentException_responds400() throws Exception {
+    @Test(expected = Exception.class)
+    public void withdraw_unexpectedException_exceptionIsPropagated() throws Exception {
 
         // Given
-        willThrow( IllegalArgumentException.class)
-                .given(accountDataService).withdraw( eq(ACCOUNT_ID), any(BigDecimal.class));
+        doThrow(new Exception()).when(accountDataService).withdraw(eq(ACCOUNT_ID), any(BigDecimal.class));
 
         // When
-        ResultActions result = mvc.perform(
-                post(URL_ACCOUNT_WITHDRAWS)
-                        .content("-100")
-                        .contentType(MediaType.APPLICATION_JSON) );
-
-        // Then
-        result.andExpect(status().isBadRequest());
-    }
-
-    @Test
-    public void withdraw_requestContentIsInvalid_responds400() throws Exception {
-
-        // When
-        ResultActions result = mvc.perform(
-                post(URL_ACCOUNT_WITHDRAWS)
-                        .content("invalid content")
-                        .contentType(MediaType.APPLICATION_JSON) );
-
-        // Then
-        result.andExpect(status().isBadRequest());
-    }
-
-    @Test
-    public void withdraw_unexpectedException_responds500() throws Exception {
-
-        // Given
-        willThrow( RuntimeException.class)
-                .given(accountDataService).withdraw( eq(ACCOUNT_ID), any(BigDecimal.class));
-
-        // When
-        ResultActions result = mvc.perform(
-                post(URL_ACCOUNT_WITHDRAWS)
-                        .content("100")
-                        .contentType(MediaType.APPLICATION_JSON) );
-
-        // Then
-        result.andExpect(status().isInternalServerError());
+        testSubject.withdraw(ACCOUNT_ID, HUNDRED_EUROS);
     }
 
     // --- statement ----------------------------------------------------------
 
     @Test
-    public void statement_happyPath_returnsStatementAndResponds200() throws Exception {
+    public void statement_happyPath_returnsStatement() throws Exception {
 
         // Given
+
         StatementDto expectedStatement = anStatementDTO();
-        given(accountDataService.statement(eq(ACCOUNT_ID))).willReturn(expectedStatement);
+
+        when(accountDataService.statement(ACCOUNT_ID)).thenReturn(expectedStatement);
 
         // When
-        ResultActions result = mvc.perform(get(URL_ACCOUNT));
+        StatementDto returnedStatement = testSubject.statement(ACCOUNT_ID);
 
         // Then
-        result
-                .andExpect(status().isOk())
-                .andExpect(content().string(new ObjectMapper().writeValueAsString(expectedStatement) ));
+
+        verify(accountDataService).statement(eq(ACCOUNT_ID));
+
+        assertThat( returnedStatement, is( equalTo( expectedStatement)));
     }
 
-    @Test
-    public void statement_dataServiceThrowsAccountNotFoundException_responds404() throws Exception {
+    @Test(expected = AccountNotFoundException.class)
+    public void statement_dataServiceThrowsAccountNotFoundException_exceptionIsPropagated() throws Exception {
 
         // Given
-        willThrow(AccountNotFoundException.class).given(accountDataService).statement(ACCOUNT_ID);
+        doThrow(new AccountNotFoundException(ACCOUNT_ID)).when(accountDataService).statement(eq(ACCOUNT_ID));
 
         // When
-        ResultActions result = mvc.perform(get(URL_ACCOUNT));
-
-        // Then
-        result.andExpect(status().isNotFound());
+        testSubject.statement(ACCOUNT_ID);
     }
 
-    @Test
-    public void statement_accountIdIsNotNumber_responds404() throws Exception {
-
-        // When
-        ResultActions result = mvc.perform(get(URL_CONTROLLER + "/not-a-number"));
-
-        // Then
-        result.andExpect(status().isNotFound());
-    }
-
-    @Test
-    public void statement_unexpectedException_responds500() throws Exception {
+    @Test(expected = Exception.class)
+    public void statement_unexpectedException_exceptionIsPropagated() throws Exception {
 
         // Given
-        willThrow(RuntimeException.class).given(accountDataService).statement(ACCOUNT_ID);
+        doThrow(new Exception()).when(accountDataService).statement(eq(ACCOUNT_ID));
 
         // When
-        ResultActions result = mvc.perform(get(URL_ACCOUNT));
-
-        // Then
-        result.andExpect(status().isInternalServerError());
+        testSubject.statement(ACCOUNT_ID);
     }
 
     // ------------------------------------------------------------------------

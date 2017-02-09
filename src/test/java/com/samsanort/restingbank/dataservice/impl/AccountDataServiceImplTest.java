@@ -6,6 +6,7 @@ import com.samsanort.restingbank.model.dto.StatementDto;
 import com.samsanort.restingbank.model.dto.TransactionDto;
 import com.samsanort.restingbank.model.entity.AccountTransaction;
 import com.samsanort.restingbank.model.entity.BankAccount;
+import com.samsanort.restingbank.model.entity.User;
 import com.samsanort.restingbank.repository.BankAccountRepository;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -29,6 +30,7 @@ import static org.mockito.Mockito.verify;
 /**
  * TODO add description
  */
+
 @RunWith(MockitoJUnitRunner.class)
 public class AccountDataServiceImplTest {
 
@@ -183,8 +185,39 @@ public class AccountDataServiceImplTest {
         testSubject.statement(ACCOUNT_ID);
     }
 
+    // --- getOwnerId ---------------------------------------------------------
+
+    @Test
+    public void getOwnerId_happyPath_returnsOwnerId() {
+
+        // Given
+
+        BankAccount account = anAccountWithTransactions(ACCOUNT_ID);
+
+        when(bankAccountRepository.findOne(ACCOUNT_ID)).thenReturn(account);
+
+        // When
+        Long ownerId = testSubject.getOwnerId(ACCOUNT_ID);
+
+        // Then
+        assertThat( ownerId, is( equalTo( account.getOwner().getId())));
+    }
+
+    @Test(expected = AccountNotFoundException.class)
+    public void getOwnerId_accountDoesNotExist_throwsAccountNotFoundException() {
+
+        // Given
+        when(bankAccountRepository.findOne(eq(ACCOUNT_ID))).thenReturn(null);
+
+        // When
+        testSubject.statement(ACCOUNT_ID);
+    }
+
+    // ------------------------------------------------------------------------
+
     private BankAccount anAccountWithTransactions(Long accountId) {
         BankAccount account = new BankAccount(accountId, new BigDecimal(500));
+        account.setOwner( new User(25L, "user@email.com", "secret_password"));
         LocalDate baseDate = LocalDate.now(ZoneId.systemDefault());
         account.getTransactions().add(new AccountTransaction(new Date( baseDate.minusDays(1).toEpochDay() ), new BigDecimal(100), "Deposit"));
         account.getTransactions().add(new AccountTransaction(new Date( baseDate.minusDays(2).toEpochDay() ), new BigDecimal(50), "Withdrawal"));

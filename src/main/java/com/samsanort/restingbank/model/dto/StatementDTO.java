@@ -14,6 +14,8 @@ public class StatementDto {
     private BigDecimal balance;
     private List<TransactionDto> transactions = new ArrayList<>();
 
+    public StatementDto(){}
+
     public StatementDto(Date date, BigDecimal balance) {
         this.date = date;
         this.balance = balance;

@@ -10,6 +10,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 
@@ -28,6 +30,7 @@ public class AccountRESTController implements AccountController {
     @Autowired
     AccountDataService accountDataService;
 
+    @PreAuthorize("@accessService.canManageAccount(authentication,#accountId)")
     @RequestMapping(value = "/{accountId}/withdrawals", method = RequestMethod.POST)
     @ResponseStatus(HttpStatus.CREATED)
     public void withdraw(
@@ -37,6 +40,7 @@ public class AccountRESTController implements AccountController {
         accountDataService.withdraw(accountId, amount);
     }
 
+    @PreAuthorize("@accessService.canManageAccount(authentication,#accountId)")
     @RequestMapping(value = "/{accountId}/deposits", method = RequestMethod.POST)
     @ResponseStatus(HttpStatus.CREATED)
     public void deposit(
@@ -46,6 +50,7 @@ public class AccountRESTController implements AccountController {
         accountDataService.deposit(accountId, amount);
     }
 
+    @PreAuthorize("@accessService.canManageAccount(authentication,#accountId)")
     @RequestMapping(value = "/{accountId}", method = RequestMethod.GET)
     @ResponseStatus(HttpStatus.OK)
     public StatementDto statement(
@@ -69,6 +74,10 @@ public class AccountRESTController implements AccountController {
     @ExceptionHandler(HttpMessageNotReadableException.class)
     @ResponseStatus(value = HttpStatus.BAD_REQUEST, reason = "Invalid request body")
     public void invalidParameter() {}
+
+    @ExceptionHandler(AccessDeniedException.class)
+    @ResponseStatus(value = HttpStatus.UNAUTHORIZED, reason = "Access denied to requested resource")
+    public void accessDenied() {}
 
     @ExceptionHandler(Exception.class)
     @ResponseStatus(value = HttpStatus.INTERNAL_SERVER_ERROR, reason = "Unexpected internal error")
