@@ -4,7 +4,7 @@ import java.math.BigDecimal;
 import java.util.Date;
 
 /**
- * TODO add description
+ * DTO info holder for a transaction.
  */
 public class TransactionDto {
 

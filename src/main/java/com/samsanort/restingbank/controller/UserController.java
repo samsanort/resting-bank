@@ -1,25 +1,16 @@
 package com.samsanort.restingbank.controller;
 
-import com.samsanort.restingbank.model.dto.BankAccountDto;
-import com.samsanort.restingbank.model.dto.UserDto;
-
-import java.util.List;
+import com.samsanort.restingbank.model.dto.RegisteredUserDto;
+import com.samsanort.restingbank.model.dto.UserRegistrationDto;
 
 /**
- * TODO add description
+ * User operations.
  */
 public interface UserController {
 
     /**
-     *
-     * @param user
+     * Registers a new user.
+     * @param user The user to register.
      */
-    void register(UserDto user);
-
-    /**
-     *
-     * @param userId
-     * @return
-     */
-    List<BankAccountDto> getBankAccounts(Long userId);
+    RegisteredUserDto register(UserRegistrationDto user);
 }

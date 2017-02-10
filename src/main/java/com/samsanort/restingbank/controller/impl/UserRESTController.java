@@ -4,23 +4,23 @@ import com.samsanort.restingbank.controller.UserController;
 import com.samsanort.restingbank.dataservice.EmailAlreadyRegisteredException;
 import com.samsanort.restingbank.dataservice.UserDataService;
 import com.samsanort.restingbank.dataservice.UserNotFoundException;
-import com.samsanort.restingbank.model.dto.BankAccountDto;
-import com.samsanort.restingbank.model.dto.UserDto;
+import com.samsanort.restingbank.model.dto.RegisteredUserDto;
+import com.samsanort.restingbank.model.dto.UserRegistrationDto;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.security.access.AccessDeniedException;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
-import java.util.List;
 
 /**
- * TODO Add description
+ * REST implementation of the controller.
+ * @see UserController
  */
+
 @RestController
 @RequestMapping("/users")
 public class UserRESTController implements UserController {
@@ -32,19 +32,10 @@ public class UserRESTController implements UserController {
 
     @RequestMapping(method = RequestMethod.POST)
     @ResponseStatus(HttpStatus.CREATED)
-    public void register(
-            @RequestBody UserDto user) {
+    public RegisteredUserDto register(
+            @RequestBody UserRegistrationDto user) {
 
-        userDataService.register(user.getEmail(), user.getPassword());
-    }
-
-    @PreAuthorize("@accessService.canManageUser(authentication,#userId)")
-    @RequestMapping(value = "/{userId}/accounts", method = RequestMethod.GET)
-    @ResponseStatus(HttpStatus.OK)
-    public List<BankAccountDto> getBankAccounts(
-            @PathVariable Long userId) {
-
-        return userDataService.getBankAccounts(userId);
+        return userDataService.register(user.getEmail(), user.getPassword());
     }
 
     @ExceptionHandler(EmailAlreadyRegisteredException.class)
@@ -62,6 +53,10 @@ public class UserRESTController implements UserController {
     @ExceptionHandler(AccessDeniedException.class)
     @ResponseStatus(value = HttpStatus.UNAUTHORIZED, reason = "Access denied to requested resource")
     public void accessDenied() {}
+
+    @ExceptionHandler(IllegalArgumentException.class)
+    @ResponseStatus(value = HttpStatus.BAD_REQUEST, reason = "Wrong email/password format")
+    public void illegalArgument() {}
 
     @ExceptionHandler(Exception.class)
     @ResponseStatus(value = HttpStatus.INTERNAL_SERVER_ERROR, reason = "Unexpected internal error")

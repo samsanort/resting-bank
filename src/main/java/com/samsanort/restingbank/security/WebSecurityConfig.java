@@ -12,7 +12,7 @@ import org.springframework.security.config.annotation.web.configuration.WebSecur
 import org.springframework.security.core.userdetails.UserDetailsService;
 
 /**
- * TODO describe
+ * Custom web security configuration class.
  */
 
 @Configuration
@@ -37,7 +37,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
         auth.userDetailsService(userDetailsService);
     }
 
-    @Bean
+    @Bean("accessService")
     public AccessService accessService() {
         return new AccessServiceImpl();
     }

@@ -5,7 +5,7 @@ import com.samsanort.restingbank.model.entity.User;
 import org.springframework.data.repository.CrudRepository;
 
 /**
- * TODO add description
+ * Repository interface for account transaction persistence operations.
  */
 public interface AccountTransactionRepository extends CrudRepository<AccountTransaction, Long>{
 }

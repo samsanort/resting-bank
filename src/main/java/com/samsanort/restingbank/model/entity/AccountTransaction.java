@@ -5,7 +5,7 @@ import java.math.BigDecimal;
 import java.util.Date;
 
 /**
- * TODO add description
+ * Account transaction entity.
  */
 @Entity
 public class AccountTransaction {

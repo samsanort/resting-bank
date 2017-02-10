@@ -6,7 +6,7 @@ import java.util.Date;
 import java.util.List;
 
 /**
- * TODO add description
+ * DTO info holder for a statement.
  */
 public class StatementDto {
 

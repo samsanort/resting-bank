@@ -22,7 +22,7 @@ import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.eq;
 
 /**
- * TODO Add description
+ * @see AccountRESTController
  */
 @RunWith(MockitoJUnitRunner.class)
 public class AccountRESTControllerTest {

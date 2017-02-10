@@ -6,7 +6,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * TODO add description
+ * Bank account entity.
  */
 @Entity
 public class BankAccount {

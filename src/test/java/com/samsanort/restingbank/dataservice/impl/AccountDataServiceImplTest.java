@@ -2,6 +2,7 @@ package com.samsanort.restingbank.dataservice.impl;
 
 import com.samsanort.restingbank.dataservice.AccountNotFoundException;
 import com.samsanort.restingbank.dataservice.InsufficientFundsException;
+import com.samsanort.restingbank.dataservice.NegativeOrZeroAmountException;
 import com.samsanort.restingbank.model.dto.StatementDto;
 import com.samsanort.restingbank.model.dto.TransactionDto;
 import com.samsanort.restingbank.model.entity.AccountTransaction;
@@ -28,7 +29,7 @@ import static org.mockito.Mockito.when;
 import static org.mockito.Mockito.verify;
 
 /**
- * TODO add description
+ * @see AccountDataServiceImpl
  */
 
 @RunWith(MockitoJUnitRunner.class)
@@ -80,8 +81,8 @@ public class AccountDataServiceImplTest {
         testSubject.deposit(ACCOUNT_ID, new BigDecimal(10));
     }
 
-    @Test(expected = IllegalArgumentException.class)
-    public void deposit_amountNotGreaterThanZero_throwsIllegalArgumentException() {
+    @Test(expected = NegativeOrZeroAmountException.class)
+    public void deposit_amountNotGreaterThanZero_throwsNegativeAmountException() {
 
         // When
         testSubject.deposit(ACCOUNT_ID, new BigDecimal(-1));
@@ -125,8 +126,8 @@ public class AccountDataServiceImplTest {
         testSubject.withdraw(ACCOUNT_ID, new BigDecimal(10));
     }
 
-    @Test(expected = IllegalArgumentException.class)
-    public void withdraw_amountNotGreaterThanZero_throwsIllegalArgumentException() {
+    @Test(expected = NegativeOrZeroAmountException.class)
+    public void withdraw_amountNotGreaterThanZero_throwsNegativeAmountException() {
 
         // When
         testSubject.withdraw(ACCOUNT_ID, new BigDecimal(-1));

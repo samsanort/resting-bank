@@ -3,7 +3,7 @@ package com.samsanort.restingbank.model.entity;
 import javax.persistence.*;
 
 /**
- * TODO add description
+ * User entity.
  */
 @Entity
 public class User {

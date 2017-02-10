@@ -1,22 +1,19 @@
 package com.samsanort.restingbank.integration;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.samsanort.restingbank.config.WebTestConfig;
-import com.samsanort.restingbank.controller.impl.AccountRESTController;
 import com.samsanort.restingbank.dataservice.AccountDataService;
 import com.samsanort.restingbank.dataservice.AccountNotFoundException;
 import com.samsanort.restingbank.dataservice.InsufficientFundsException;
 import com.samsanort.restingbank.model.dto.StatementDto;
 import com.samsanort.restingbank.model.dto.TransactionDto;
 import com.samsanort.restingbank.security.AccessService;
-import com.samsanort.restingbank.security.WebSecurityConfig;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.test.context.support.WithMockUser;
@@ -36,12 +33,14 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 /**
- * TODO Add description
+ * Integration tests for the account REST controller interactions.
+ * @see com.samsanort.restingbank.controller.impl.AccountRESTController
  */
+
 @RunWith(SpringRunner.class)
-@WebMvcTest(AccountRESTController.class)
-@Import({ WebTestConfig.class, WebSecurityConfig.class })
-public class AccountRESTControllerTest {
+@SpringBootTest
+@AutoConfigureMockMvc
+public class AccountRESTControllerIntegrationTest {
 
     @Autowired
     private MockMvc mvc;
@@ -66,7 +65,7 @@ public class AccountRESTControllerTest {
     @Before
     public void initTests() {
 
-        given( accessService.canManageAccount( any(Authentication.class), any(Long.class)))
+        given(accessService.canManageAccount(any(Authentication.class), any(Long.class)))
                 .willReturn(true);
     }
 
@@ -79,13 +78,13 @@ public class AccountRESTControllerTest {
 
         // Given
         willDoNothing()
-                .given(accountDataService).deposit( eq(ACCOUNT_ID), any(BigDecimal.class));
+                .given(accountDataService).deposit(eq(ACCOUNT_ID), any(BigDecimal.class));
 
         // When
         ResultActions result = mvc.perform(
                 post(URL_ACCOUNT_DEPOSITS)
                         .content("100")
-                        .contentType(MediaType.APPLICATION_JSON) );
+                        .contentType(MediaType.APPLICATION_JSON));
 
         // Then
         result.andExpect(status().isCreated());
@@ -96,14 +95,14 @@ public class AccountRESTControllerTest {
     public void deposit_dataServiceThrowsAccountNotFoundException_responds404() throws Exception {
 
         // Given
-        willThrow( AccountNotFoundException.class)
-                .given(accountDataService).deposit( eq(ACCOUNT_ID), any(BigDecimal.class));
+        willThrow(AccountNotFoundException.class)
+                .given(accountDataService).deposit(eq(ACCOUNT_ID), any(BigDecimal.class));
 
         // When
         ResultActions result = mvc.perform(
                 post(URL_ACCOUNT_DEPOSITS)
                         .content("100")
-                        .contentType(MediaType.APPLICATION_JSON) );
+                        .contentType(MediaType.APPLICATION_JSON));
 
         // Then
         result.andExpect(status().isNotFound());
@@ -117,7 +116,7 @@ public class AccountRESTControllerTest {
         ResultActions result = mvc.perform(
                 post(URL_CONTROLLER + "/not-a-number" + URLPART_DEPOSITS)
                         .content("100")
-                        .contentType(MediaType.APPLICATION_JSON) );
+                        .contentType(MediaType.APPLICATION_JSON));
 
         // Then
         result.andExpect(status().isNotFound());
@@ -128,14 +127,14 @@ public class AccountRESTControllerTest {
     public void deposit_dataServiceThrowsIllegalArgumentException_responds400() throws Exception {
 
         // Given
-        willThrow( IllegalArgumentException.class)
-                .given(accountDataService).deposit( eq(ACCOUNT_ID), any(BigDecimal.class));
+        willThrow(IllegalArgumentException.class)
+                .given(accountDataService).deposit(eq(ACCOUNT_ID), any(BigDecimal.class));
 
         // When
         ResultActions result = mvc.perform(
                 post(URL_ACCOUNT_DEPOSITS)
                         .content("-100")
-                        .contentType(MediaType.APPLICATION_JSON) );
+                        .contentType(MediaType.APPLICATION_JSON));
 
         // Then
         result.andExpect(status().isBadRequest());
@@ -149,7 +148,7 @@ public class AccountRESTControllerTest {
         ResultActions result = mvc.perform(
                 post(URL_ACCOUNT_DEPOSITS)
                         .content("invalid content")
-                        .contentType(MediaType.APPLICATION_JSON) );
+                        .contentType(MediaType.APPLICATION_JSON));
 
         // Then
         result.andExpect(status().isBadRequest());
@@ -160,30 +159,30 @@ public class AccountRESTControllerTest {
     public void deposit_unexpectedException_responds500() throws Exception {
 
         // Given
-        willThrow( RuntimeException.class)
-                .given(accountDataService).deposit( eq(ACCOUNT_ID), any(BigDecimal.class));
+        willThrow(RuntimeException.class)
+                .given(accountDataService).deposit(eq(ACCOUNT_ID), any(BigDecimal.class));
 
         // When
         ResultActions result = mvc.perform(
                 post(URL_ACCOUNT_DEPOSITS)
                         .content("100")
-                        .contentType(MediaType.APPLICATION_JSON) );
+                        .contentType(MediaType.APPLICATION_JSON));
 
         // Then
         result.andExpect(status().isInternalServerError());
     }
 
     @Test
-    public void deposit_unauthorizedUser_responds302() throws Exception {
+    public void deposit_unauthorizedUser_responds401() throws Exception {
 
         // When
         ResultActions result = mvc.perform(
                 post(URL_ACCOUNT_DEPOSITS)
                         .content("100")
-                        .contentType(MediaType.APPLICATION_JSON) );
+                        .contentType(MediaType.APPLICATION_JSON));
 
         // Then
-        result.andExpect(status().isFound());
+        result.andExpect(status().isUnauthorized());
     }
 
     // --- withdraw -----------------------------------------------------------
@@ -194,13 +193,13 @@ public class AccountRESTControllerTest {
 
         // Given
         willDoNothing()
-                .given(accountDataService).withdraw( eq(ACCOUNT_ID), any(BigDecimal.class));
+                .given(accountDataService).withdraw(eq(ACCOUNT_ID), any(BigDecimal.class));
 
         // When
         ResultActions result = mvc.perform(
                 post(URL_ACCOUNT_WITHDRAWS)
                         .content("100")
-                        .contentType(MediaType.APPLICATION_JSON) );
+                        .contentType(MediaType.APPLICATION_JSON));
 
         // Then
         result.andExpect(status().isCreated());
@@ -211,14 +210,14 @@ public class AccountRESTControllerTest {
     public void withdraw_dataServiceThrowsInsufficientFundsException_responds409() throws Exception {
 
         // Given
-        willThrow( InsufficientFundsException.class)
-                .given(accountDataService).withdraw( eq(ACCOUNT_ID), any(BigDecimal.class));
+        willThrow(InsufficientFundsException.class)
+                .given(accountDataService).withdraw(eq(ACCOUNT_ID), any(BigDecimal.class));
 
         // When
         ResultActions result = mvc.perform(
                 post(URL_ACCOUNT_WITHDRAWS)
                         .content("100")
-                        .contentType(MediaType.APPLICATION_JSON) );
+                        .contentType(MediaType.APPLICATION_JSON));
 
         // Then
         result.andExpect(status().isConflict());
@@ -229,14 +228,14 @@ public class AccountRESTControllerTest {
     public void withdraw_dataServiceThrowsAccountNotFoundException_responds404() throws Exception {
 
         // Given
-        willThrow( AccountNotFoundException.class)
-                .given(accountDataService).withdraw( eq(ACCOUNT_ID), any(BigDecimal.class));
+        willThrow(AccountNotFoundException.class)
+                .given(accountDataService).withdraw(eq(ACCOUNT_ID), any(BigDecimal.class));
 
         // When
         ResultActions result = mvc.perform(
                 post(URL_ACCOUNT_WITHDRAWS)
                         .content("100")
-                        .contentType(MediaType.APPLICATION_JSON) );
+                        .contentType(MediaType.APPLICATION_JSON));
 
         // Then
         result.andExpect(status().isNotFound());
@@ -250,7 +249,7 @@ public class AccountRESTControllerTest {
         ResultActions result = mvc.perform(
                 post(URL_CONTROLLER + "/not-a-number" + URLPART_WITHDRAWALS)
                         .content("100")
-                        .contentType(MediaType.APPLICATION_JSON) );
+                        .contentType(MediaType.APPLICATION_JSON));
 
         // Then
         result.andExpect(status().isNotFound());
@@ -261,14 +260,14 @@ public class AccountRESTControllerTest {
     public void withdraw_dataServiceThrowsIllegalArgumentException_responds400() throws Exception {
 
         // Given
-        willThrow( IllegalArgumentException.class)
-                .given(accountDataService).withdraw( eq(ACCOUNT_ID), any(BigDecimal.class));
+        willThrow(IllegalArgumentException.class)
+                .given(accountDataService).withdraw(eq(ACCOUNT_ID), any(BigDecimal.class));
 
         // When
         ResultActions result = mvc.perform(
                 post(URL_ACCOUNT_WITHDRAWS)
                         .content("-100")
-                        .contentType(MediaType.APPLICATION_JSON) );
+                        .contentType(MediaType.APPLICATION_JSON));
 
         // Then
         result.andExpect(status().isBadRequest());
@@ -282,7 +281,7 @@ public class AccountRESTControllerTest {
         ResultActions result = mvc.perform(
                 post(URL_ACCOUNT_WITHDRAWS)
                         .content("invalid content")
-                        .contentType(MediaType.APPLICATION_JSON) );
+                        .contentType(MediaType.APPLICATION_JSON));
 
         // Then
         result.andExpect(status().isBadRequest());
@@ -293,30 +292,30 @@ public class AccountRESTControllerTest {
     public void withdraw_unexpectedException_responds500() throws Exception {
 
         // Given
-        willThrow( RuntimeException.class)
-                .given(accountDataService).withdraw( eq(ACCOUNT_ID), any(BigDecimal.class));
+        willThrow(RuntimeException.class)
+                .given(accountDataService).withdraw(eq(ACCOUNT_ID), any(BigDecimal.class));
 
         // When
         ResultActions result = mvc.perform(
                 post(URL_ACCOUNT_WITHDRAWS)
                         .content("100")
-                        .contentType(MediaType.APPLICATION_JSON) );
+                        .contentType(MediaType.APPLICATION_JSON));
 
         // Then
         result.andExpect(status().isInternalServerError());
     }
 
     @Test
-    public void withdraw_unauthorizedUser_responds302() throws Exception {
+    public void withdraw_unauthorizedUser_responds401() throws Exception {
 
         // When
         ResultActions result = mvc.perform(
                 post(URL_ACCOUNT_WITHDRAWS)
                         .content("100")
-                        .contentType(MediaType.APPLICATION_JSON) );
+                        .contentType(MediaType.APPLICATION_JSON));
 
         // Then
-        result.andExpect(status().isFound());
+        result.andExpect(status().isUnauthorized());
     }
 
     // --- statement ----------------------------------------------------------
@@ -335,7 +334,7 @@ public class AccountRESTControllerTest {
         // Then
         result
                 .andExpect(status().isOk())
-                .andExpect(content().string(new ObjectMapper().writeValueAsString(expectedStatement) ));
+                .andExpect(content().string(new ObjectMapper().writeValueAsString(expectedStatement)));
     }
 
     @Test
@@ -378,13 +377,13 @@ public class AccountRESTControllerTest {
     }
 
     @Test
-    public void statement_unauthorizedUser_responds302() throws Exception {
+    public void statement_unauthorizedUser_responds401() throws Exception {
 
         // When
         ResultActions result = mvc.perform(get(URL_ACCOUNT));
 
         // Then
-        result.andExpect(status().isFound());
+        result.andExpect(status().isUnauthorized());
     }
 
     // ------------------------------------------------------------------------

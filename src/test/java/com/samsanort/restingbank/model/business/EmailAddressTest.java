@@ -7,7 +7,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.IsEqual.equalTo;
 
 /**
- * Created by samu on 2/9/17.
+ * @see EmailAddress
  */
 public class EmailAddressTest {
 

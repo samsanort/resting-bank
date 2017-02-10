@@ -9,7 +9,7 @@ import java.util.Date;
 import java.util.List;
 
 /**
- * TODO describe
+ * Representation of an account statement.
  */
 public class Statement {
 
@@ -18,9 +18,9 @@ public class Statement {
     private List<AccountTransaction> transactions;
 
     /**
-     * TODO describe
-     * @param accountBalance
-     * @param transactions
+     * C'tor.
+     * @param accountBalance Account balance at the time of the statement.
+     * @param transactions The transactions performed onto the account up to the statement date.
      */
     public Statement(BigDecimal accountBalance, List<AccountTransaction> transactions) {
         this.accountBalance = accountBalance;
@@ -28,8 +28,8 @@ public class Statement {
     }
 
     /**
-     * TODO describe
-     * @return
+     * Obtains a StatementDto representation of this statement.
+     * @return The StatementDTO representation.
      */
     public StatementDto toDto() {
 

@@ -18,7 +18,7 @@ import static org.hamcrest.core.IsEqual.equalTo;
 import static org.mockito.Mockito.when;
 
 /**
- * TODO describe
+ * @see AccessServiceImpl
  */
 
 @RunWith(MockitoJUnitRunner.class)

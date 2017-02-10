@@ -4,7 +4,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
- * TODO describe
+ * Email object, with format validation.
  */
 public class EmailAddress {
 
@@ -17,9 +17,9 @@ public class EmailAddress {
     private final String value;
 
     /**
-     *
-     * @param address
-     * @throws IllegalArgumentException
+     * C'tor.
+     * @param address The email address.
+     * @throws IllegalArgumentException If the email format is invalid.
      */
     public EmailAddress(String address) {
 
@@ -33,8 +33,8 @@ public class EmailAddress {
     }
 
     /**
-     *
-     * @return
+     * Obtains the validated email value.
+     * @return The format-checked email.
      */
     public String getValue() {
         return this.value;

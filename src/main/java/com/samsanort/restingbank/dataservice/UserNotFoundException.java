@@ -1,13 +1,14 @@
 package com.samsanort.restingbank.dataservice;
 
 /**
- * TODO add description
+ * Thrown to indicate that occurred a reference to a user id
+ * that does not exist.
  */
 public class UserNotFoundException extends RuntimeException {
 
     /**
-     * TODO describe
-     * @param userId
+     * C'tor.
+     * @param userId The unexisting referenced user.
      */
     public UserNotFoundException(Long userId) {
         super(String.format("User ID: %s", userId).toString());

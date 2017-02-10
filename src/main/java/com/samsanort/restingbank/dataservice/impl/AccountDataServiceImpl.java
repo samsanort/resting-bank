@@ -3,6 +3,7 @@ package com.samsanort.restingbank.dataservice.impl;
 import com.samsanort.restingbank.dataservice.AccountDataService;
 import com.samsanort.restingbank.dataservice.AccountNotFoundException;
 import com.samsanort.restingbank.dataservice.InsufficientFundsException;
+import com.samsanort.restingbank.dataservice.NegativeOrZeroAmountException;
 import com.samsanort.restingbank.model.business.Statement;
 import com.samsanort.restingbank.model.dto.StatementDto;
 import com.samsanort.restingbank.model.entity.AccountTransaction;
@@ -13,10 +14,6 @@ import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
 import java.util.Date;
-
-/**
- * TODO add description
- */
 
 @Component("accountDataService")
 public class AccountDataServiceImpl implements AccountDataService {
@@ -55,7 +52,7 @@ public class AccountDataServiceImpl implements AccountDataService {
     private void processTransaction(Long accountId, BigDecimal amount, TransactionType transactionType) {
 
         if( amount == null || amount.compareTo(new BigDecimal(0)) < 1 ) {
-            throw new IllegalArgumentException("Amount must be greater than zero.");
+            throw new NegativeOrZeroAmountException(amount);
         }
 
         BankAccount bankAccount = retrieveBankAccountOrFail(accountId);

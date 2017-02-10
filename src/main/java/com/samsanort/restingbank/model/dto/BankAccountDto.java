@@ -3,7 +3,7 @@ package com.samsanort.restingbank.model.dto;
 import java.math.BigDecimal;
 
 /**
- * TODO describe
+ * DTO info holder for a Bank account.
  */
 public class BankAccountDto {
 

@@ -17,8 +17,9 @@ import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.when;
 
 /**
- * TODO add description
+ * @see UserDetailsServiceImpl
  */
+
 @RunWith(MockitoJUnitRunner.class)
 public class UserDetailsServiceImplTest {
 

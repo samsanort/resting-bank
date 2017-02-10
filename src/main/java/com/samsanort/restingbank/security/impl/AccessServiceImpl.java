@@ -8,10 +8,10 @@ import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 
 /**
- * TODO describe
+ * @see AccessService
  */
 
-@Service
+@Service("accessService")
 public class AccessServiceImpl implements AccessService {
 
     @Autowired

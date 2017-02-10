@@ -1,8 +1,7 @@
 package com.samsanort.restingbank.dataservice.impl;
 
 import com.samsanort.restingbank.dataservice.EmailAlreadyRegisteredException;
-import com.samsanort.restingbank.dataservice.UserNotFoundException;
-import com.samsanort.restingbank.model.dto.BankAccountDto;
+import com.samsanort.restingbank.model.dto.RegisteredUserDto;
 import com.samsanort.restingbank.model.entity.BankAccount;
 import com.samsanort.restingbank.model.entity.User;
 import com.samsanort.restingbank.repository.BankAccountRepository;
@@ -17,19 +16,15 @@ import org.mockito.runners.MockitoJUnitRunner;
 import org.mockito.stubbing.Answer;
 
 import java.math.BigDecimal;
-import java.util.List;
 
 import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.IsEqual.equalTo;
 import static org.mockito.Matchers.any;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 /**
- * Created by samu on 2/6/17.
+ * @see UserDataServiceImpl
  */
 
 @RunWith(MockitoJUnitRunner.class)
@@ -54,7 +49,7 @@ public class UserDataServiceImplTest {
     // --- register -----------------------------------------------------------
 
     @Test
-    public void register_happyPath_persistsUserWithNewBankAccount() {
+    public void register_happyPath_returnsRegisteredUser() {
 
         // Given
         when( userRepository.findByEmail(USER_EMAIL)).thenReturn( null);
@@ -62,7 +57,7 @@ public class UserDataServiceImplTest {
         when( accountRepository.save(any(BankAccount.class))).thenAnswer( mockedSaveAccountAnswer());
 
         // When
-        testSubject.register(USER_EMAIL, USER_PASSWORD );
+        RegisteredUserDto registeredUser = testSubject.register( USER_EMAIL, USER_PASSWORD );
 
         // Then
 
@@ -74,6 +69,9 @@ public class UserDataServiceImplTest {
 
         assertUser( userArg.getValue(), accountArg.getValue());
         assertBankAccount( accountArg.getValue(), userArg.getValue());
+
+        assertThat( registeredUser.getId(), is( equalTo( userArg.getValue().getId())));
+        assertThat( registeredUser.getAccountId(), is( equalTo( accountArg.getValue().getId())));
     }
 
     @Test(expected = EmailAlreadyRegisteredException.class)
@@ -114,62 +112,12 @@ public class UserDataServiceImplTest {
         testSubject.register(USER_EMAIL, "");
     }
 
-    // --- getBankAccounts ----------------------------------------------------
-
-    @Test
-    public void getBankAccounts_userHasAccounts_returnsListWithAccounts() {
-
-        // Given
-        User userWithAccount = aUserWithBankAccount( aBankAccount() );
-        when( userRepository.findOne( userWithAccount.getId())).thenReturn( userWithAccount);
-
-        // When
-        List<BankAccountDto> accounts = testSubject.getBankAccounts(userWithAccount.getId());
-
-        // Then
-        assertThat( accounts, notNullValue());
-        assertThat( accounts.size(), is( equalTo( 1 ) ));
-        assertThat( accounts.get(0).getId(), is( equalTo( userWithAccount.getAccount().getId() )) );
-        assertThat( accounts.get(0).getBalance(), is( equalTo( userWithAccount.getAccount().getBalance() )) );
-    }
-
-    @Test
-    public void getBankAccounts_userDoesNotHaveAccount_returnsEmptyList() {
-
-        // Given
-        User userWithAccount = aUserWithBankAccount( null );
-        when( userRepository.findOne( userWithAccount.getId())).thenReturn( userWithAccount);
-
-        // When
-        List<BankAccountDto> accounts = testSubject.getBankAccounts(userWithAccount.getId());
-
-        // Then
-        assertThat( accounts, notNullValue());
-        assertThat( accounts.size(), is( equalTo( 0 ) ));
-    }
-
-    @Test(expected = UserNotFoundException.class)
-    public void getBankAccounts_userDoesNotExist_throwsUserNotFoundException() {
-
-        // Given
-        Long idOfNonExistingUser = 99L;
-        when( userRepository.findOne( idOfNonExistingUser)).thenReturn( null);
-
-        // When
-        testSubject.getBankAccounts( idOfNonExistingUser );
-    }
-
     // ------------------------------------------------------------------------
 
     private User aUserWithBankAccount(BankAccount bankAccount) {
         User user = new User(USER_ID, USER_EMAIL, USER_PASSWORD);
         user.setAccount(bankAccount);
         return user;
-    }
-
-    private BankAccount aBankAccount() {
-
-        return new BankAccount(ACCOUNT_ID, new BigDecimal(1000.5));
     }
 
     private void assertUser(User user, BankAccount account) {

@@ -4,6 +4,7 @@ import com.samsanort.restingbank.controller.AccountController;
 import com.samsanort.restingbank.dataservice.AccountDataService;
 import com.samsanort.restingbank.dataservice.AccountNotFoundException;
 import com.samsanort.restingbank.dataservice.InsufficientFundsException;
+import com.samsanort.restingbank.dataservice.NegativeOrZeroAmountException;
 import com.samsanort.restingbank.model.dto.StatementDto;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -19,8 +20,10 @@ import javax.servlet.http.HttpServletRequest;
 import java.math.BigDecimal;
 
 /**
- * TODO Add description
+ * REST implementation of the controller.
+ * @see AccountController
  */
+
 @RestController
 @RequestMapping("/accounts")
 public class AccountRESTController implements AccountController {
@@ -67,9 +70,15 @@ public class AccountRESTController implements AccountController {
     @ResponseStatus(value = HttpStatus.CONFLICT, reason = "Not enough funds in the account")
     public void insufficientFunds() {}
 
-    @ExceptionHandler(IllegalArgumentException.class)
+    @ExceptionHandler(NegativeOrZeroAmountException.class)
     @ResponseStatus(value = HttpStatus.BAD_REQUEST, reason = "Positive amount expected")
-    public void illegalArgument() {}
+    public void negativeAmount() {}
+
+    @ExceptionHandler(IllegalArgumentException.class)
+    @ResponseStatus(value = HttpStatus.BAD_REQUEST, reason = "Unexpected illegal argument")
+    public void illegalArgument(IllegalArgumentException iae) {
+        logger.debug(iae.getMessage(), iae);
+    }
 
     @ExceptionHandler(HttpMessageNotReadableException.class)
     @ResponseStatus(value = HttpStatus.BAD_REQUEST, reason = "Invalid request body")
