@@ -8,6 +8,7 @@ import com.samsanort.restingbank.model.business.Statement;
 import com.samsanort.restingbank.model.dto.StatementDto;
 import com.samsanort.restingbank.model.entity.AccountTransaction;
 import com.samsanort.restingbank.model.entity.BankAccount;
+import com.samsanort.restingbank.repository.AccountTransactionRepository;
 import com.samsanort.restingbank.repository.BankAccountRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -20,6 +21,9 @@ public class AccountDataServiceImpl implements AccountDataService {
 
     @Autowired
     private BankAccountRepository bankAccountRepository;
+
+    @Autowired
+    private AccountTransactionRepository accountTransactionRepository;
 
     @Override
     public void withdraw(Long accountId, BigDecimal amount) {
@@ -57,9 +61,6 @@ public class AccountDataServiceImpl implements AccountDataService {
 
         BankAccount bankAccount = retrieveBankAccountOrFail(accountId);
 
-        bankAccount.getTransactions().add(
-                new AccountTransaction( new Date(), amount, transactionType.name()));
-
         BigDecimal currentBalance = bankAccount.getBalance();
         switch(transactionType) {
 
@@ -75,6 +76,10 @@ public class AccountDataServiceImpl implements AccountDataService {
                 break;
         }
 
+        AccountTransaction transaction = new AccountTransaction( new Date(), amount, transactionType.name());
+        this.accountTransactionRepository.save(transaction);
+
+        bankAccount.getTransactions().add(transaction);
         this.bankAccountRepository.save(bankAccount);
     }
 

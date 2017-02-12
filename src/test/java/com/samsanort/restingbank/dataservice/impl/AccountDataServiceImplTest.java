@@ -8,6 +8,7 @@ import com.samsanort.restingbank.model.dto.TransactionDto;
 import com.samsanort.restingbank.model.entity.AccountTransaction;
 import com.samsanort.restingbank.model.entity.BankAccount;
 import com.samsanort.restingbank.model.entity.User;
+import com.samsanort.restingbank.repository.AccountTransactionRepository;
 import com.samsanort.restingbank.repository.BankAccountRepository;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -41,6 +42,9 @@ public class AccountDataServiceImplTest {
     @Mock
     private BankAccountRepository bankAccountRepository;
 
+    @Mock
+    private AccountTransactionRepository accountTransactionRepository;
+
     private final static Long ACCOUNT_ID = 9999L;
 
     // --- deposit ------------------------------------------------------------
@@ -62,13 +66,19 @@ public class AccountDataServiceImplTest {
 
         // Then
 
-        ArgumentCaptor<BankAccount> argument = ArgumentCaptor.forClass(BankAccount.class);
-        verify(bankAccountRepository).save(argument.capture());
-        BankAccount captured = argument.getValue();
+        ArgumentCaptor<AccountTransaction> transactionArgCaptor = ArgumentCaptor.forClass(AccountTransaction.class);
+        verify(accountTransactionRepository).save(transactionArgCaptor.capture());
+        AccountTransaction capturedTransaction = transactionArgCaptor.getValue();
 
-        assertThat(captured.getBalance(), is( equalTo( initialBalance.add(depositAmount) )));
-        assertThat(captured.getTransactions().size(), is( equalTo(1)));
-        assertThat(captured.getTransactions().get(0).getAmount(), is( equalTo( depositAmount)));
+        assertThat(capturedTransaction.getAmount(), is( equalTo( depositAmount )));
+
+        ArgumentCaptor<BankAccount> accountArgCaptor = ArgumentCaptor.forClass(BankAccount.class);
+        verify(bankAccountRepository).save(accountArgCaptor.capture());
+        BankAccount capturedAccount = accountArgCaptor.getValue();
+
+        assertThat(capturedAccount.getBalance(), is( equalTo( initialBalance.add(depositAmount) )));
+        assertThat(capturedAccount.getTransactions().size(), is( equalTo(1)));
+        assertThat(capturedAccount.getTransactions().get(0).getAmount(), is( equalTo( depositAmount)));
     }
 
     @Test(expected = AccountNotFoundException.class)
@@ -107,13 +117,19 @@ public class AccountDataServiceImplTest {
 
         // Then
 
-        ArgumentCaptor<BankAccount> argument = ArgumentCaptor.forClass(BankAccount.class);
-        verify(bankAccountRepository).save(argument.capture());
-        BankAccount captured = argument.getValue();
+        ArgumentCaptor<AccountTransaction> transactionArgCaptor = ArgumentCaptor.forClass(AccountTransaction.class);
+        verify(accountTransactionRepository).save(transactionArgCaptor.capture());
+        AccountTransaction capturedTransaction = transactionArgCaptor.getValue();
 
-        assertThat(captured.getBalance(), is( equalTo( initialBalance.subtract(withdrawalAmount))));
-        assertThat(captured.getTransactions().size(), is( equalTo(1)));
-        assertThat(captured.getTransactions().get(0).getAmount(), is( equalTo( withdrawalAmount)));
+        assertThat(capturedTransaction.getAmount(), is( equalTo( withdrawalAmount )));
+
+        ArgumentCaptor<BankAccount> accountArgCaptor = ArgumentCaptor.forClass(BankAccount.class);
+        verify(bankAccountRepository).save(accountArgCaptor.capture());
+        BankAccount capturedAccount = accountArgCaptor.getValue();
+
+        assertThat(capturedAccount.getBalance(), is( equalTo( initialBalance.subtract(withdrawalAmount))));
+        assertThat(capturedAccount.getTransactions().size(), is( equalTo(1)));
+        assertThat(capturedAccount.getTransactions().get(0).getAmount(), is( equalTo( withdrawalAmount)));
     }
 
     @Test(expected = AccountNotFoundException.class)
